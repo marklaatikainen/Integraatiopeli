@@ -1,0 +1,114 @@
+html, body{
+	height: 97%;
+	background-color: #eef;
+}
+
+canvas {
+	height: 99%;
+	position: absolute;
+	top: 0px;
+	right: 0px;
+	background-image: url("../img/lauta_bg.png");
+	background-size: auto 100%;
+	background-repeat: no-repeat;
+	background-position: top right;
+	margin-right: 1px;
+}
+
+.icon4 {
+	background: url(../img/battery-4.png) no-repeat scroll 7px 1px;
+	padding-left:30px;
+}
+
+.icon3 {
+	background: url(../img/battery-3.png) no-repeat scroll 7px 1px;
+	padding-left:30px;
+}
+
+.icon2 {
+	background: url(../img/battery-2.png) no-repeat scroll 7px 1px;
+	padding-left:30px;
+}
+
+.icon1 {
+	background: url(../img/battery-1.png) no-repeat scroll 7px 1px;
+	padding-left:30px;
+}
+.icon0 {
+	background: url(../img/battery-0.png) no-repeat scroll 7px 1px;
+	padding-left:30px;
+}
+
+
+.fix {
+}
+
+.icon {
+}
+
+#controls {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	width: 300px;
+	height: 100%;
+}
+
+.display {
+	margin-top: 20px;
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	height: 110px;
+	margin-bottom: 20px;
+	border: 1px solid #bbb;
+	overflow: auto;
+	padding-left: 5px;
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.shuffle {
+	margin-top: 20px;
+	width: 90%;
+	margin-left: auto;
+	margin-right: auto;
+	height: 115px;
+	padding: 8px;
+	margin-bottom: 20px;
+	overflow: auto;
+}
+
+button {
+	padding: 5px 5px !important;
+}
+
+.head {
+	margin-left: 15px;
+}
+
+a:link {
+    text-decoration: none;
+	color: red;
+}
+
+a:visited {
+    text-decoration: none;
+	color: red;
+}
+
+a:hover {
+	color: green;
+}
+
+.red { color: red;}
+.blue { color: blue;}
+.green { color: green;}
+
+.hidden { display: none;}
+
+hr {
+	border: 0;
+	height: 1px;
+	background: #333;
+	background-image: linear-gradient(to right, #efe, #333, #efe);
+}

@@ -1,0 +1,110 @@
+<!--
+Innovointi ja projektikurssin ryhmätyö.
+Ryhmä: Aikalisä: https://aikalisa.wordpress.com/
+Digitaalisen version pelistä tehnyt: Mark Laatikainen, 2017
+
+Tämä prototyyppi ja prototyyppiin liittyvät kuva, ääni, video ja muut prototyypissä tarvittavat tiedostot ja materiaalit on julkaistu Creative Commons 4.0 lisenssillä. Käyttämällä näitä materiaaleja osoitat lukeneesi ja hyväksyneesi Creative Commons 4.0 lisenssiehdot, jotka löytyvät osoitteesta: http://creativecommons.fi/lisenssien-kayttoohje/
+
+-->
+
+<!doctype HTML>
+<html>
+<head>
+	<title>Integraatiopeli</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0 maximum-scale=1.0, user-scalable=0">
+	<link rel="icon" href="assets/img/favicon.ico" type="image/x-icon"/>
+	<link rel="stylesheet" href="assets/css/bootstrap.min.css">
+	<script src="assets/js/jquery.min.js"></script>
+	<script src="assets/js/bootstrap.min.js"></script>
+	<link rel="stylesheet" href="assets/css/style.css">
+	<script src="assets/js/config.js" charset="utf-8"></script>
+	<script src="assets/js/script.js" charset="utf-8"></script>
+</head>
+<body onload="startGame()">
+	<div id="controls">
+	<button id="fullScreen" onclick="launchIntoFullscreen(document.documentElement);">Full Screen</button>
+		<div class="shuffle">
+			<button id="play" class="btn btn-default" onclick="rollDice()">Heitä nopat</button>
+			<button id="reset" class="btn btn-default" disabled onclick="resetGame()">Aloita peli alusta</button>
+			<button id="help" class="btn btn-danger" data-toggle="modal" data-target="#rules">?</button>
+			<br><br>Vuoroja pelattu: <b class="blue" id="lkm">0</b><br>Korjauspisteitä käytettävissä: <b class="green" id="kp">0</b>
+		</div>
+		
+		<br>
+		
+		<p class="head text-primary">Edellinen kierros:</p>	
+		<div class="display">
+			<p id="noppa1"></p>
+			<p id="noppa2"></p>
+			<br>
+		</div>
+		
+		<br>
+		
+		<p class="head text-primary">Korjattavissa olevat:</p>
+		<div class="display">
+			<ul id="list" class="list-group"></ul>
+		</div>
+	</div>
+
+	<!-- Modal -->
+	<div id="rules" class="modal fade" role="dialog">
+		<div class="modal-dialog">
+
+			<!-- Modal content-->
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal">&times;</button>
+					<h4 class="modal-title">Integraatiopelin ohjeet</h4>
+				</div>
+				<div class="modal-body">
+					
+					<p>Pelissä pelaaja on älykodissa, jossa elektroniikka alkaa mennä rikki. Pelaajan tehtävänä on korjata vikoja parhaansa mukaan. Pelaaja voittaa pelin selviämällä kaikki 20 vuoroa, ilman liiallisia vahinkoja.</p>
+                    
+					<p>Alussa pelilaudalla ovat kaikki alueet ehjät ja peli alkaa ensimmäisestä nopan heitosta.</p>
+                    
+					<p>Pelaaja joutuu korjaamaan rikkoutuneet komponentit, pysyäkseen pelissä mukana. Jos pelaaja ei kolmeen vuoroon korjaa rikkinäistä komponenttia, se rikkoutuu korjauskelvottomaksi. Kolmen pisteen komponentit menevät rikki kahdessa vuorossa kolmen sijaan.</p>
+                    
+					<p>Pelaaja voittaa pelin selviämällä 20 vuoroa ilman, että komponentit menevät korjauskelvottomaksi (ovat rikki liian monen vuoron ajan).</p>
+
+					<hr>
+					<img src="assets/img/battery-4.png" alt="battery"/> <img src="assets/img/battery-3.png" alt="battery"/> <img src="assets/img/battery-2.png" alt="battery"/> <img src="assets/img/battery-1.png" alt="battery"/> <img src="assets/img/battery-0.png" alt="battery"/>
+					<p>Pelissä paristoikonit ilmaisevat sen, että kuinka kauan on vielä<br>aikaa korjata kyseinen komponentti ennen pelin häviämistä.				
+					</p>
+					<br>
+					Eriväriset ympyrät ilmaisevat komponentin tilan.<br>
+					<img src="assets/img/greencircle.png" alt="vihreä"/>&nbsp;Vihreä on kunnossa,<br>
+					<img src="assets/img/yellowcircle.png" alt="keltainen"/>&nbsp;keltainen ympyrä ilmaisee komponentin olevan pois käytöstä muun komponentin rikkoutumisen johdosta.<br>
+					<img src="assets/img/redcircle.png" alt="punainen"/>&nbsp;Punainen väri tarkoittaa komponentin olevan rikki ja se on korjattava mahdollisimman nopeasti.
+
+					<h5><b>Komponentit, jotka poistavat muita komponentteja käytöstä</b></h5>
+
+					<p>Jos “Sulakkeet” tai “Verkko” menee rikki, vaikuttaa se lukuisiin muihin komponentteihin poistamalla ne käytöstä. Käytöstä poistettu komponentti palaa normaalitilaan, kun sen rikkoutumisellaan käytöstä poistanut komponentti korjataan.</p>
+					<h5><b>Tietokone</b></h5>
+					<p>Jos Tietokone menee rikki, maksaa muiden komponenttien korjaus yhden korjauspisteen enemmän. Muiden komponenttien korjaamiseen vaadittavien korjauspisteiden määrä palaa ennalleen, kun tietokoneen korjaa.</p>
+					
+					<img src="assets/img/control.png" alt="pelin ohjaus"/>
+					<p>Vasemmassa yläkulmassa ovat “Heitä nopat”-, “Aloita peli alusta”-, ja “ohje”-painikkeet.
+					“Heitä nopat”- painike siirtää pelin seuraavaan vuoroon, ja arpoo sinulle jonkin määrän korjauspisteitä, ja arpoo myös mahdolliset vuorolla rikki menevät komponentit.</p>
+
+					<p>Painikkeiden alla olevat numerot kertovat, montako vuoroa olet pelannut (kahdestakymmenestä), ja tällä hetkellä käytettävissä olevien korjauspisteiden kokonaismäärän (viimeksi saadut korjauspisteet + aikaisemmilta vuoroilta säästyneet. Käyttämättömät korjauspisteet säilyvät seuraavalle vuorolle.
+					</p>
+					<br><br>
+					<img src="assets/img/lastround.png" alt="edellinen kierros"/>
+					<p>“Edellinen kierros”-ruutu kertoo sinulle viime kierroksella rikki menneet komponentit ja viime kierroksella saadut korjauspisteet.</p>
+					<br><br>
+					<img src="assets/img/fix.png" alt="korjaa"/>
+					<p>Komponentti korjataan klikkaamalla sen nimeä "Korjattavissa olevat:" laatikosta. Nimen perässä näkyy pistemäärä, jolla komponentti korjataan.</p>
+					<p>Tässä kyseisessä tilanteessa pelaajan on seuraavalle vuorolle selvitäkseen korjattava tietokone, sillä sen edessä oleva paristoikoni näyttää rastia.</p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Sulje</button>
+				</div>
+			</div>
+
+		</div>
+	</div>
+	
+</body>
+</html>
