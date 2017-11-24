@@ -12,16 +12,22 @@ Tämä prototyyppi ja prototyyppiin liittyvät kuva, ääni, video ja muut proto
 // pelin asetukset:
 gOptions = {
 	peliKierroksia: 20,
+	// nopan minimilukema
 	noppaMin: 1,
+	// nopan maksimilukema
 	noppaMax: 3,
+	// käytettävissä olevat maksimipisteet
 	maxPisteet: 5,
+	// rikkoutuneiden osien maksimimäärä pelin lopussa, jotta peli voitetaan
 	rikMaara: 3,
+	// montako kierrosta kalliimmat osat saavat olla rikki (sulakkeet,verkko,tietokone)
 	hLkm: 3,
+	// montako kierrosta halvelmmat osat saavat olla rikki
 	kLkm: 4
 }
 
-
-var myGamePiece;
+// pelinappula
+var myCircle;
 // kierroslaskuri
 var i = 0;
 if (i == gOptions.peliKierroksia+1) {
@@ -52,7 +58,7 @@ var isPaloilmoitinJarjestelmaRikki = false;
 var isAvainRikki = false;
 var isTurvakameratRikki = false;
 
-// komponenttien sijainnit (x, y, halkaisija)
+// komponenttien sijainnit pelilaudalla (x, y, halkaisija)
 var sulakkeet = [1050, 66, 27];
 var verkko = [1077, 612, 28];
 var tietokone = [883, 220, 28];
@@ -83,7 +89,7 @@ var turvakameratVuorojaRikki = 0;
 
 // pelin aloitus
 function startGame() {
-	myGameArea.start();
+	pelilauta.start();
     // komponentit vihreiksi
     resetComponents();
     // pistemäärä nollataan
@@ -95,7 +101,7 @@ function startGame() {
 }
 
 // pelialue kanvas
-var myGameArea = {
+var pelilauta = {
     canvas: document.createElement("canvas"),
     start: function () {
         this.canvas.width = 1150;
@@ -111,7 +117,7 @@ function component(color, x, y, d) {
     this.x = x;
     this.y = y;
     this.color = color;
-    ctx = myGameArea.context;
+    ctx = pelilauta.context;
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.d, 0, 2 * Math.PI);
     ctx.fillStyle = this.color;
@@ -309,6 +315,7 @@ function riko(rik) {
     // luodaan korjauslinkki ja pariston kuva
     var a = document.createElement("a");
     var icon = document.createElement("i");
+	// tietokoneen korjaushinta on aina 3 pistettä
     if (rik == 3) { pis = 3; }
     a.innerHTML = rikNimi + " " + pis + "p<br>";
     a.setAttribute('href', "#");
@@ -318,11 +325,13 @@ function riko(rik) {
     icon.setAttribute('class', "icon4");
     icon.setAttribute('id', rikkoutuva);
     icon.appendChild(a);
+	// tarkastetaan, onko osa jo rikki, eikä lisätä toiseen kertaan listalle
     if (document.getElementById(rik) == null) {
         document.getElementById("list").appendChild(icon);
     }
-    var class_names = document.getElementsByClassName("fix");
 
+	// lisätään tapahtumakuuntelija korjausta varten
+    var class_names = document.getElementsByClassName("fix");
     for (var i = 0; i < class_names.length; i++) {
         class_names[i].addEventListener('click', korjaa, false);
     }
@@ -356,39 +365,37 @@ function muutOsat(rik) {
         if (poisKaytosta.indexOf(12) == -1) {
             poisKaytosta.push(12);
         }
-//        return "aurinkokennot, lamput, ilmastointijärjestelmä, hälytysjärjestelmä, paloilmointinjärjestelmä, äly-avain, turvakamerat";
-} else if (r == 1) {
-    if (poisKaytosta.indexOf(9) == -1) {
-        poisKaytosta.push(9);
-    }
-    if (poisKaytosta.indexOf(10) == -1) {
-        poisKaytosta.push(10);
-    }
-    if (poisKaytosta.indexOf(11) == -1) {
-        poisKaytosta.push(11);
-    }
-    if (poisKaytosta.indexOf(12) == -1) {
-        poisKaytosta.push(12);
-    }
-//        return "hälytysjärjestelmä, paloilmointinjärjestelmä, äly-avain, turvakamerat";
-} else if (r == 2) {
-    poisKaytosta.push(r);
-//        return "Muiden komponenttien korjaus maksaa 1 pisteen enemmän.";
-} else {
-    return "-";
+	} else if (r == 1) {
+		if (poisKaytosta.indexOf(9) == -1) {
+			poisKaytosta.push(9);
+		}
+		if (poisKaytosta.indexOf(10) == -1) {
+			poisKaytosta.push(10);
+		}
+		if (poisKaytosta.indexOf(11) == -1) {
+			poisKaytosta.push(11);
+		}
+		if (poisKaytosta.indexOf(12) == -1) {
+			poisKaytosta.push(12);
+		}
+	} else if (r == 2) {
+		poisKaytosta.push(r);
+	} else {
+		return;
+	}
 }
-}
-
+// heitetään noppia
 function rollDice() {
     i++;
-    if (i > gOptions.peliKierroksia && rikKomp <= 3) {
+	
+    if (i > gOptions.peliKierroksia && rikKomp <= gOptions.rikMaara) {
         i = gOptions.peliKierroksia;
         alert("Voitit pelin!");
         document.getElementById("play").disabled = true;
         document.getElementById("reset").disabled = false;
         document.getElementById("list").innerHTML = "";
 		return;
-    } else if (i > gOptions.peliKierroksia && rikKomp > 3) {
+    } else if (i > gOptions.peliKierroksia && rikKomp > gOptions.rikMaara) {
         i = gOptions.peliKierroksia;
         alert("Hävisit pelin!\nLiikaa rikkinäisiä komponentteja");
         document.getElementById("play").disabled = true;
@@ -406,7 +413,7 @@ function rollDice() {
         } else if(sulakeVuorojaRikki == 3) {
             document.getElementById("sulakkeet").className = "icon0";
         }
-        if (sulakeVuorojaRikki > 3) {
+        if (sulakeVuorojaRikki > gOptions.hLkm) {
             alert("Hävisit pelin!\nSulakkeet ovat olleet liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -423,7 +430,7 @@ function rollDice() {
         } else if(verkkoVuorojaRikki == 3) {
             document.getElementById("verkko").className = "icon0";
         }
-        if (verkkoVuorojaRikki > 3) {
+        if (verkkoVuorojaRikki > gOptions.hLkm) {
             alert("Hävisit pelin!\nVerkko on ollut liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -440,7 +447,7 @@ function rollDice() {
         }  else if(tietokoneVuorojaRikki == 3) {
             document.getElementById("tietokone").className = "icon0";
         }
-        if (tietokoneVuorojaRikki > 3) {
+        if (tietokoneVuorojaRikki > gOptions.hLkm) {
             alert("Hävisit pelin!\nTietokone on ollut liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -459,7 +466,7 @@ function rollDice() {
         } else if(aurinkokennotVuorojaRikki == 4) {
             document.getElementById("aurinkokennot").className = "icon0";
         }
-        if (aurinkokennotVuorojaRikki > 4) {
+        if (aurinkokennotVuorojaRikki > gOptions.kLkm) {
             alert("Hävisit pelin!\nAurinkokennot ovat olleet liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -478,7 +485,7 @@ function rollDice() {
         } else if(lammitysjarjestelmaVuorojaRikki == 4) {
             document.getElementById("lammitysjarjestelma").className = "icon0";
         }
-        if (lammitysjarjestelmaVuorojaRikki > 4) {
+        if (lammitysjarjestelmaVuorojaRikki > gOptions.kLkm) {
             alert("Hävisit pelin!\nLämmitysjärjestelmä on ollut liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -497,7 +504,7 @@ function rollDice() {
         } else if(lamputVuorojaRikki == 4) {
             document.getElementById("lamput").className = "icon0";
         }
-        if (lamputVuorojaRikki > 4) {
+        if (lamputVuorojaRikki > gOptions.kLkm) {
             alert("Hävisit pelin!\nLamput ovat olleet liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -516,7 +523,7 @@ function rollDice() {
         } else if(ilmastointijarjestelmaVuorojaRikki == 4) {
             document.getElementById("ilmastointijarjestelma").className = "icon0";
         }
-        if (ilmastointijarjestelmaVuorojaRikki > 4) {
+        if (ilmastointijarjestelmaVuorojaRikki > gOptions.kLkm) {
             alert("Hävisit pelin!\nIlmastointijärjestelmä on ollut liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -535,7 +542,7 @@ function rollDice() {
         } else if(kodinkoneetVuorojaRikki == 4) {
             document.getElementById("kodinkoneet").className = "icon0";
         }
-        if (kodinkoneetVuorojaRikki > 4) {
+        if (kodinkoneetVuorojaRikki > gOptions.kLkm) {
             alert("Hävisit pelin!\nKodinkoneet ovat olleet liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -554,7 +561,7 @@ function rollDice() {
         } else if(halytysjarjestelmaVuorojaRikki == 4) {
             document.getElementById("halytysjarjestelma").className = "icon0";
         }
-        if (halytysjarjestelmaVuorojaRikki > 4) {
+        if (halytysjarjestelmaVuorojaRikki > gOptions.kLkm) {
             alert("Hävisit pelin!\nHälytysjärjestelmä on ollut liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -573,7 +580,7 @@ function rollDice() {
         } else if(paloilmointinjarjestelmaVuorojaRikki == 4) {
             document.getElementById("paloilmointinjarjestelma").className = "icon0";
         }
-        if (paloilmointinjarjestelmaVuorojaRikki > 4) {
+        if (paloilmointinjarjestelmaVuorojaRikki > gOptions.kLkm) {
             alert("Hävisit pelin!\nPaloilmoitinjärjestelmä on ollut liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -592,7 +599,7 @@ function rollDice() {
         } else if(avainVuorojaRikki == 4) {
             document.getElementById("aly-avain").className = "icon0";
         }
-        if (avainVuorojaRikki > 4) {
+        if (avainVuorojaRikki > gOptions.kLkm) {
             alert("Hävisit pelin!\nÄlyavain on ollut liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -611,7 +618,7 @@ function rollDice() {
         } else if(turvakameratVuorojaRikki == 4) {
             document.getElementById("turvakamerat").className = "icon0";
         }
-        if (turvakameratVuorojaRikki > 4) {
+        if (turvakameratVuorojaRikki > gOptions.kLkm) {
             alert("Hävisit pelin!\nTurvakamerat ovat olleet liian pitkään rikki!");
             document.getElementById("list").innerHTML = "";
             document.getElementById("play").disabled = true;
@@ -625,9 +632,11 @@ function rollDice() {
     } else {
         document.getElementById("reset").disabled = false;
     }
+	// painotettu noppa osille
     var painotus = [1, 1, 2, 2, 3, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
     rik = painotus[Math.floor(Math.random() * painotus.length)];
     muutOsat(rik);
+	// pistenoppa
     var nop2 = Math.floor(Math.random() * gOptions.noppaMax + gOptions.noppaMin);
 
     if (pisteet == 0) {
@@ -701,9 +710,11 @@ function korjaa() {
         arry = [turvakamerat[0], turvakamerat[1], turvakamerat[2]];
     }
 
+	// nostetaan korjauksen hintaa
     if (isTietokoneRikki == true) {
         pis += 1;
     }
+	// tietokone maksaa kuitenkin aina 3 pistettä
     if (this.id == 3) {
       pis = 3;
   }
@@ -713,9 +724,11 @@ function korjaa() {
     alert("Korjaus maksoi " + pis + " pistettä. Sinulla on jäljellä " + pisteet + " pistettä.");
     rikKomp -= 1;
 
+	// rikkinäisten komponenttien määrä
     if (rikKomp < 0) {
         rikKomp == 0;
     }
+	
     document.getElementById("kp").innerHTML = pisteet;
     if (this.id == 1) {
         sulakeVuorojaRikki = 0;
@@ -763,7 +776,7 @@ function korjaa() {
         isTurvakameratRikki = false;
     }
 
-    myGamePiece = new component("green", arry[0], arry[1], arry[2]);
+    myCircle = new component("green", arry[0], arry[1], arry[2]);
         // sulakkeet
         if (this.id == 1) {
          if (rikkinaiset.indexOf(1) != -1) {
@@ -774,31 +787,31 @@ function korjaa() {
        }
        if (poisKaytosta.indexOf(4) != -1) {
                 // aurinkokennot
-                myGamePiece = new component("green", aurinkokennot[0], aurinkokennot[1], aurinkokennot[2]);
+                myCircle = new component("green", aurinkokennot[0], aurinkokennot[1], aurinkokennot[2]);
             }
             if (poisKaytosta.indexOf(6) != -1) {
                 // lamput
-                myGamePiece = new component("green", lamput[0], lamput[1], lamput[2]);
+                myCircle = new component("green", lamput[0], lamput[1], lamput[2]);
             }
             if (poisKaytosta.indexOf(7) != -1) {
                 // ilmastointijärjestelmä
-                myGamePiece = new component("green", ilmastointijarjestelma[0], ilmastointijarjestelma[1], ilmastointijarjestelma[2]);
+                myCircle = new component("green", ilmastointijarjestelma[0], ilmastointijarjestelma[1], ilmastointijarjestelma[2]);
             }
             if (poisKaytosta.indexOf(9) != -1) {
                 // hälytysjärjestelmä
-                myGamePiece = new component("green", halytysjarjestelma[0], halytysjarjestelma[1], halytysjarjestelma[2]);
+                myCircle = new component("green", halytysjarjestelma[0], halytysjarjestelma[1], halytysjarjestelma[2]);
             }
             if (poisKaytosta.indexOf(10) != -1) {
                 // paloilmointinjärjestelmä
-                myGamePiece = new component("green", paloilmointinjarjestelma[0], paloilmointinjarjestelma[1], paloilmointinjarjestelma[2]);
+                myCircle = new component("green", paloilmointinjarjestelma[0], paloilmointinjarjestelma[1], paloilmointinjarjestelma[2]);
             }
             if (poisKaytosta.indexOf(11) != -1) {
                 // äly-avain
-                myGamePiece = new component("green", avain[0], avain[1], avain[2]);
+                myCircle = new component("green", avain[0], avain[1], avain[2]);
             }
             if (poisKaytosta.indexOf(12) != -1) {
                 // turvakamerat
-                myGamePiece = new component("green", turvakamerat[0], turvakamerat[1], turvakamerat[2]);
+                myCircle = new component("green", turvakamerat[0], turvakamerat[1], turvakamerat[2]);
             }
             // verkko
         } else if (this.id == 2) {
@@ -810,19 +823,19 @@ function korjaa() {
        }
        if (poisKaytosta.indexOf(9) != -1) {
                 // hälytysjärjestelmä
-                myGamePiece = new component("green", halytysjarjestelma[0], halytysjarjestelma[1], halytysjarjestelma[2]);
+                myCircle = new component("green", halytysjarjestelma[0], halytysjarjestelma[1], halytysjarjestelma[2]);
             }
             if (poisKaytosta.indexOf(10) != -1) {
                 // paloilmointinjärjestelmä
-                myGamePiece = new component("green", paloilmointinjarjestelma[0], paloilmointinjarjestelma[1], paloilmointinjarjestelma[2]);
+                myCircle = new component("green", paloilmointinjarjestelma[0], paloilmointinjarjestelma[1], paloilmointinjarjestelma[2]);
             }
             if (poisKaytosta.indexOf(11) != -1) {
                 // äly-avain
-                myGamePiece = new component("green", avain[0], avain[1], avain[2]);
+                myCircle = new component("green", avain[0], avain[1], avain[2]);
             }
             if (poisKaytosta.indexOf(12) != -1) {
                 // turvakamerat
-                myGamePiece = new component("green", turvakamerat[0], turvakamerat[1], turvakamerat[2]);
+                myCircle = new component("green", turvakamerat[0], turvakamerat[1], turvakamerat[2]);
             }
         } else if (this.id == 3) {
          if (rikkinaiset.indexOf(3) != -1) {
@@ -957,13 +970,13 @@ function setColors(comp) {
     }
 
     if (cmp != []) {
-        myGamePiece = new component("red", cmp[0], cmp[1], cmp[2]);
+        myCircle = new component("red", cmp[0], cmp[1], cmp[2]);
     }
 
     for (var i = 0; i < oog.length; i++) {
         for (var o = 0; o < oog[i].length; o++) {
          if (rikkinaiset.indexOf() == -1) {
-            myGamePiece = new component("yellow", oog[i][0], oog[i][1], oog[i][2]);
+            myCircle = new component("yellow", oog[i][0], oog[i][1], oog[i][2]);
         }
     }
 }
@@ -972,32 +985,33 @@ function setColors(comp) {
 // palauta vihreä väri kaikkiin
 function resetComponents() {
     // 1. sulakkeet
-    myGamePiece = new component("green", sulakkeet[0], sulakkeet[1], sulakkeet[2]);
+    myCircle = new component("green", sulakkeet[0], sulakkeet[1], sulakkeet[2]);
     // 2. verkko
-    myGamePiece = new component("green", verkko[0], verkko[1], verkko[2]);
+    myCircle = new component("green", verkko[0], verkko[1], verkko[2]);
     // 3. tietokone
-    myGamePiece = new component("green", tietokone[0], tietokone[1], tietokone[2]);
+    myCircle = new component("green", tietokone[0], tietokone[1], tietokone[2]);
     // 4. aurinkokennot
-    myGamePiece = new component("green", aurinkokennot[0], aurinkokennot[1], aurinkokennot[2]);
+    myCircle = new component("green", aurinkokennot[0], aurinkokennot[1], aurinkokennot[2]);
     // 5. lämmitysjärjestelmä
-    myGamePiece = new component("green", lammitysjarjestelma[0], lammitysjarjestelma[1], lammitysjarjestelma[2]);
+    myCircle = new component("green", lammitysjarjestelma[0], lammitysjarjestelma[1], lammitysjarjestelma[2]);
     // 6. lamput
-    myGamePiece = new component("green", lamput[0], lamput[1], lamput[2]);
+    myCircle = new component("green", lamput[0], lamput[1], lamput[2]);
     // 7. ilmastointijärjestelmä
-    myGamePiece = new component("green", ilmastointijarjestelma[0], ilmastointijarjestelma[1], ilmastointijarjestelma[2]);
+    myCircle = new component("green", ilmastointijarjestelma[0], ilmastointijarjestelma[1], ilmastointijarjestelma[2]);
     // 8. kodinkoneet
-    myGamePiece = new component("green", kodinkoneet[0], kodinkoneet[1], kodinkoneet[2]);
+    myCircle = new component("green", kodinkoneet[0], kodinkoneet[1], kodinkoneet[2]);
     // 9. hälytysjärjestelmä
-    myGamePiece = new component("green", halytysjarjestelma[0], halytysjarjestelma[1], halytysjarjestelma[2]);
+    myCircle = new component("green", halytysjarjestelma[0], halytysjarjestelma[1], halytysjarjestelma[2]);
     // 10. paloilmointinjärjestelmä
-    myGamePiece = new component("green", paloilmointinjarjestelma[0], paloilmointinjarjestelma[1], paloilmointinjarjestelma[2]);
+    myCircle = new component("green", paloilmointinjarjestelma[0], paloilmointinjarjestelma[1], paloilmointinjarjestelma[2]);
     // 11. äly-avain
-    myGamePiece = new component("green", avain[0], avain[1], avain[2]);
+    myCircle = new component("green", avain[0], avain[1], avain[2]);
     // 12. turvakamerat
-    myGamePiece = new component("green", turvakamerat[0], turvakamerat[1], turvakamerat[2]);
+    myCircle = new component("green", turvakamerat[0], turvakamerat[1], turvakamerat[2]);
 
 }
 
+// full screen api
 function launchIntoFullscreen(element) {
 	  if(element.requestFullscreen) {
 		element.requestFullscreen();
